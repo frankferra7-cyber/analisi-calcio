@@ -285,7 +285,7 @@ footer{margin-left:248px}
  async function findSelectedFixture(){
   const query=currentFixtureQuery();
   if(!query)throw new Error('Data della partita non riconosciuta.');
-  const url=API_BASE.replace(/\\/$/,'')+'/fixtures?league='+query.leagueId+'&season='+query.season+'&date='+query.date;
+  const url=API_BASE.replace(/\/$/,'')+'/fixtures?league='+query.leagueId+'&season='+query.season+'&date='+query.date;
   const response=await fetch(url,{headers:{'Accept':'application/json'}});
   if(!response.ok)throw new Error('Errore proxy: HTTP '+response.status);
   const payload=await response.json();
