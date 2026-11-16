@@ -175,7 +175,7 @@ footer{margin-left:248px}
  const detail=document.getElementById('matchDetail');
  const leagueCards=document.querySelectorAll('.league-fixtures');
  // Inserire qui l'URL del proxy sicuro (es. Cloudflare Worker), mai la chiave API.
- const API_BASE='';
+ const API_BASE='https://analisi-calcio-api.frankferra7.workers.dev';
  const api='https://www.thesportsdb.com/api/v1/json/123/';
  const badgeCache=new Map();
  const clean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
