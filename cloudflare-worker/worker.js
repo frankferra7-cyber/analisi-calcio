@@ -51,6 +51,9 @@ export default {
       requiredSecret = "PITCHAPI_KEY";
       upstreamPath = "/v1/date/" + date + "?status=upcoming";
       cacheSeconds = 60;
+    } else if (url.pathname === "/fixtures/live") {
+      upstreamPath = "/fixtures?live=all";
+      cacheSeconds = 15;
     } else if (url.pathname === "/fixtures") {
       const league = url.searchParams.get("league") || "";
       const season = url.searchParams.get("season") || "";
