@@ -36,7 +36,7 @@ export default {
     if (request.method !== "GET") {
       return json({ error: "Method not allowed" }, 405, origin);
     }
-    if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    if (!ALLOWED_ORIGINS.has(origin)) {
       return json({ error: "Origin not allowed" }, 403, origin);
     }
     if (!env.API_FOOTBALL_KEY) {
@@ -50,14 +50,14 @@ export default {
       const league = url.searchParams.get("league") || "";
       const season = url.searchParams.get("season") || "";
       const date = url.searchParams.get("date") || "";
-      if (!ALLOWED_LEAGUES.has(league) || season !== "2026" || !/^2026-11-\\d{2}$/.test(date)) {
+      if (!ALLOWED_LEAGUES.has(league) || season !== "2026" || !/^2026-11-\d{2}$/.test(date)) {
         return json({ error: "Invalid fixture query" }, 400, origin);
       }
       upstreamPath = "/fixtures?league=" + league + "&season=" + season + "&date=" + date;
       cacheSeconds = 30;
     } else if (url.pathname === "/fixtures/lineups") {
       const fixture = url.searchParams.get("fixture") || "";
-      if (!/^\\d{1,12}$/.test(fixture)) {
+      if (!/^\d{1,12}$/.test(fixture)) {
         return json({ error: "Invalid fixture id" }, 400, origin);
       }
       upstreamPath = "/fixtures/lineups?fixture=" + fixture;
