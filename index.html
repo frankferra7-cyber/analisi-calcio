@@ -164,7 +164,7 @@ footer{margin-left:248px}
     <article class="lineup-card"><div class="lineup-status">Casa</div><h3 id="lineupHomeName">—</h3><span class="lineup-module">Modulo: da definire</span><div class="lineup-empty">Probabile undici non ancora disponibile. I nomi dei giocatori verranno mostrati solo quando sarà collegata una fonte dati affidabile.</div></article>
     <article class="lineup-card"><div class="lineup-status">Trasferta</div><h3 id="lineupAwayName">—</h3><span class="lineup-module">Modulo: da definire</span><div class="lineup-empty">Probabile undici non ancora disponibile. I nomi dei giocatori verranno mostrati solo quando sarà collegata una fonte dati affidabile.</div></article>
    </div>
-   <div class="note">Le formazioni ufficiali vengono pubblicate poco prima della partita. Le formazioni ufficiali vengono normalmente pubblicate poco prima del calcio d'inizio e non sono disponibili per tutte le competizioni. <a href="https://www.api-football.com/documentation-v3" target="_blank" rel="noopener" style="color:var(--green)">Info sulla disponibilità dei dati</a>.</div>
+   <div class="note">Le probabili formazioni possono comparire fino a 48 ore prima del calcio d’inizio. Il sito controlla periodicamente il campo “confirmed” e passa alle ufficiali quando la fonte le conferma. La copertura varia in base alla competizione. <a href="https://www.api-football.com/documentation-v3" target="_blank" rel="noopener" style="color:var(--green)">Info sulla disponibilità dei dati</a>.</div>
   </div>
  </div>
 </section>
@@ -256,7 +256,14 @@ footer{margin-left:248px}
   document.getElementById('panelLineups').hidden=details;
  }
  document.getElementById('tabMatchDetails').addEventListener('click',()=>setDetailTab('details'));
- document.getElementById('tabLineups').addEventListener('click',()=>{setDetailTab('lineups');loadLineups();});
+ let lineupPollTimer=null;
+ document.getElementById('tabLineups').addEventListener('click',()=>{
+  setDetailTab('lineups');loadLineups();
+  if(lineupPollTimer)clearInterval(lineupPollTimer);
+  lineupPollTimer=setInterval(()=>{
+   if(detail.classList.contains('open')&&!document.getElementById('panelLineups').hidden)loadLineups();
+  },60000);
+ });
  document.getElementById('refreshLive').addEventListener('click',loadLiveFixture);
  let selectedFixture=null;
  function resetLivePanel(){
@@ -307,31 +314,40 @@ footer{margin-left:248px}
   finally{button.disabled=false;}
  }
  async function loadLineups(){
-  const boxes=Array.from(document.querySelectorAll('.lineup-card .lineup-empty'));
-  const modules=Array.from(document.querySelectorAll('.lineup-card .lineup-module'));
-  boxes.forEach(el=>el.textContent='Ricerca della partita e delle formazioni…');
+  const cards=Array.from(document.querySelectorAll('.lineup-card'));
+  const boxes=cards.map(card=>card.querySelector('.lineup-empty'));
+  const modules=cards.map(card=>card.querySelector('.lineup-module'));
+  const labels=cards.map(card=>card.querySelector('.lineup-status'));
+  boxes.forEach(el=>el.textContent='Ricerca delle probabili formazioni…');
   modules.forEach(el=>el.textContent='Modulo: in attesa');
+  labels.forEach(el=>el.textContent='In aggiornamento');
   if(!API_BASE){boxes.forEach(el=>el.textContent='Proxy non configurato.');return;}
   try{
-   const fixture=selectedFixture?.fixture?.id?selectedFixture:await findSelectedFixture();
-   const response=await fetch(API_BASE.replace(/\\/$/,'')+'/fixtures/lineups?fixture='+fixture.fixture.id,{headers:{'Accept':'application/json'}});
-   if(!response.ok)throw new Error('Errore proxy: HTTP '+response.status);
+   const query=currentFixtureQuery();
+   if(!query)throw new Error('Data della partita non riconosciuta.');
+   const home=document.getElementById('detailHome').textContent.trim();
+   const away=document.getElementById('detailAway').textContent.trim();
+   const params=new URLSearchParams({date:query.date,home,away});
+   const response=await fetch(API_BASE.replace(/\/$/,'')+'/pitchapi/lineups?'+params.toString(),{headers:{'Accept':'application/json'}});
    const payload=await response.json();
-   if(payload.errors&&Object.keys(payload.errors).length)throw new Error('Il provider segnala un problema: '+JSON.stringify(payload.errors));
-   const lineups=Array.isArray(payload.response)?payload.response:[];
-   if(!lineups.length){boxes.forEach(el=>el.textContent='Le formazioni ufficiali non sono ancora state pubblicate o non sono disponibili per questa partita.');return;}
-   const ordered=[fixture.teams?.home?.id,fixture.teams?.away?.id].map((teamId,index)=>lineups.find(entry=>entry.team?.id===teamId)||lineups[index]);
-   ordered.forEach((entry,i)=>{
-    const box=boxes[i],module=modules[i];
-    if(!entry){box.textContent='Formazione non disponibile per questa squadra.';return;}
-    const players=(entry.startXI||[]).map(p=>p.player?.name).filter(Boolean);
-    const subs=(entry.substitutes||[]).map(p=>p.player?.name).filter(Boolean);
-    box.textContent=players.length?'Titolari: '+players.join(', ')+(subs.length?' · Panchina: '+subs.join(', '):''):'La fonte non ha ancora pubblicato i nomi dei giocatori.';
-    if(module)module.textContent='Modulo: '+(entry.formation||'non comunicato');
+   if(!response.ok)throw new Error(payload.error||('Errore proxy: HTTP '+response.status));
+   const data=payload.lineups||{};
+   [data.home,data.away].forEach((side,i)=>{
+    if(!side){boxes[i].textContent='Formazione non disponibile per questa squadra.';return;}
+    const starters=(side.starters||[]).map(p=>p.name).filter(Boolean);
+    const subs=(side.subs||[]).map(p=>p.name).filter(Boolean);
+    const confirmed=side.confirmed===true;
+    labels[i].textContent=confirmed?'Ufficiale':'Probabile';
+    boxes[i].textContent=starters.length?'Titolari: '+starters.join(', ')+(subs.length?' · Panchina: '+subs.join(', '):''):'La fonte non ha ancora pubblicato i nomi dei giocatori.';
+    modules[i].textContent='Modulo: '+(side.formation||'non comunicato');
    });
-  }catch(error){boxes.forEach(el=>el.textContent=error.message||'Errore nel recupero delle formazioni.');}
+   if(!data.home&&!data.away)throw new Error('La fonte non ha ancora restituito le formazioni.');
+  }catch(error){
+   boxes.forEach(el=>el.textContent=error.message||'Errore nel recupero delle formazioni.');
+   labels.forEach(el=>el.textContent='Non disponibile');
+  }
  }
- function close(){detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+ function close(){if(lineupPollTimer){clearInterval(lineupPollTimer);lineupPollTimer=null;}detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
  document.getElementById('backToCalendar').addEventListener('click',close);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&detail.classList.contains('open'))close();});
 })();
