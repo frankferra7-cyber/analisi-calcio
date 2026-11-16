@@ -14,7 +14,7 @@ nav{display:flex;gap:7px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration
 main{max-width:1160px;margin:auto;padding:34px 22px 60px}.hero{padding:32px;border:1px solid #29415b;border-radius:22px;background:linear-gradient(115deg,#142941,#0d192a 70%);position:relative;overflow:hidden}.eyebrow{color:var(--green);font-weight:750;text-transform:uppercase;letter-spacing:1.5px;font-size:11px}.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.08;margin:10px 0}.hero p{max-width:650px;color:var(--muted);margin:0}.hero:after{content:"⚽";position:absolute;right:6%;top:15%;font-size:clamp(70px,12vw,130px);opacity:.12}
 .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:30px 0 14px}.section-head h2{margin:0;font-size:21px}.section-head span{color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:19px}.card h3{margin:0 0 5px;font-size:16px}.muted{color:var(--muted)}.metric{font-size:30px;font-weight:800;letter-spacing:-1px;margin:12px 0 0}.tag{display:inline-block;padding:4px 8px;border-radius:7px;background:#24364b;color:var(--blue);font-size:11px;font-weight:700}.split{display:grid;grid-template-columns:1.25fr .75fr;gap:15px}.table{width:100%;border-collapse:collapse;margin-top:12px}.table th,.table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-size:12px;font-weight:600}.table td:last-child,.table th:last-child{text-align:right}.fixture{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.fixture:last-child{border:0}.teams{font-weight:650}.time{color:var(--muted);font-size:12px;white-space:nowrap}.note{padding:14px 16px;border-radius:12px;background:#17283c;color:var(--muted);font-size:13px;margin-top:16px}footer{border-top:1px solid var(--line);color:var(--muted);text-align:center;padding:22px;font-size:12px}
-@media(max-width:760px){.nav{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.split{grid-template-columns:1fr}.hero{padding:25px}.section-head{align-items:start;flex-direction:column}}
+.matchday-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.league-fixtures{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}.league-fixtures h3{margin:0 0 5px}.round-label{font-size:12px;color:var(--green);font-weight:750;margin-bottom:12px}.match-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.match-row:last-child{border:0}.match-teams{font-size:13px;font-weight:650}.match-date{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}@media(max-width:900px){.matchday-grid{grid-template-columns:1fr}}\n@media(max-width:760px){.nav{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.split{grid-template-columns:1fr}.hero{padding:25px}.section-head{align-items:start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -33,10 +33,48 @@ main{max-width:1160px;margin:auto;padding:34px 22px 60px}.hero{padding:32px;bord
 <article class="card"><h3>🏴 Premier League</h3><p class="muted">Risultati, forma recente e confronto tra club.</p></article>
 <article class="card"><h3>🇪🇸 La Liga</h3><p class="muted">Andamento del campionato e indicatori collettivi.</p></article>
 </section>
-<div class="split">
-<section id="calendario"><div class="section-head"><h2>Calendario</h2></div><div class="card"><div class="fixture"><div><div class="teams">Squadra A — Squadra B</div><div class="muted">Partita dimostrativa</div></div><div class="time">Da programmare</div></div><div class="fixture"><div><div class="teams">Squadra C — Squadra D</div><div class="muted">Partita dimostrativa</div></div><div class="time">Da programmare</div></div><div class="fixture"><div><div class="teams">Squadra E — Squadra F</div><div class="muted">Partita dimostrativa</div></div><div class="time">Da programmare</div></div><div class="note">Il calendario è un segnaposto: non mostra partite o risultati in tempo reale.</div></div></section>
-<section><div class="section-head"><h2>Classifica esempio</h2></div><div class="card"><table class="table"><thead><tr><th>#</th><th>Squadra</th><th>Pt</th></tr></thead><tbody><tr><td>1</td><td>Club A</td><td>—</td></tr><tr><td>2</td><td>Club B</td><td>—</td></tr><tr><td>3</td><td>Club C</td><td>—</td></tr><tr><td>4</td><td>Club D</td><td>—</td></tr></tbody></table><div class="note">Dati fittizi, da sostituire con statistiche verificate.</div></div></section>
+<section id="calendario">
+<div class="section-head"><h2>Prossima giornata</h2><span>Solo il prossimo turno · stagione 2026/27</span></div>
+<div class="matchday-grid">
+<article class="league-fixtures"><h3>🇮🇹 Serie A</h3><div class="round-label">12ª giornata · 21–23 novembre</div>
+<div class="match-row"><div class="match-teams">Como – Cagliari</div><div class="match-date">Sab 21 · 15:00</div></div>
+<div class="match-row"><div class="match-teams">Lazio – Lecce</div><div class="match-date">Sab 21 · 15:00</div></div>
+<div class="match-row"><div class="match-teams">Parma – Roma</div><div class="match-date">Sab 21 · 18:00</div></div>
+<div class="match-row"><div class="match-teams">Napoli – Torino</div><div class="match-date">Sab 21 · 20:45</div></div>
+<div class="match-row"><div class="match-teams">Juventus – Venezia</div><div class="match-date">Dom 22 · 12:30</div></div>
+<div class="match-row"><div class="match-teams">Bologna – Udinese</div><div class="match-date">Dom 22 · 15:00</div></div>
+<div class="match-row"><div class="match-teams">Sassuolo – Genoa</div><div class="match-date">Dom 22 · 15:00</div></div>
+<div class="match-row"><div class="match-teams">Milan – Frosinone</div><div class="match-date">Dom 22 · 18:00</div></div>
+<div class="match-row"><div class="match-teams">Atalanta – Inter</div><div class="match-date">Dom 22 · 20:45</div></div>
+<div class="match-row"><div class="match-teams">Monza – Fiorentina</div><div class="match-date">Lun 23 · 20:45</div></div>
+</article>
+<article class="league-fixtures"><h3>🏴 Premier League</h3><div class="round-label">Prossimo turno · 21–23 novembre</div>
+<div class="match-row"><div class="match-teams">Manchester City – Fulham</div><div class="match-date">Sab 21 · 13:30</div></div>
+<div class="match-row"><div class="match-teams">Bournemouth – Nottingham Forest</div><div class="match-date">Sab 21 · 16:00</div></div>
+<div class="match-row"><div class="match-teams">Aston Villa – Sunderland</div><div class="match-date">Sab 21 · 16:00</div></div>
+<div class="match-row"><div class="match-teams">Chelsea – Leeds United</div><div class="match-date">Sab 21 · 16:00</div></div>
+<div class="match-row"><div class="match-teams">Coventry City – Crystal Palace</div><div class="match-date">Sab 21 · 16:00</div></div>
+<div class="match-row"><div class="match-teams">Tottenham – Ipswich Town</div><div class="match-date">Sab 21 · 16:00</div></div>
+<div class="match-row"><div class="match-teams">Newcastle – Arsenal</div><div class="match-date">Sab 21 · 18:30</div></div>
+<div class="match-row"><div class="match-teams">Hull City – Brighton</div><div class="match-date">Dom 22 · 15:00</div></div>
+<div class="match-row"><div class="match-teams">Liverpool – Manchester United</div><div class="match-date">Dom 22 · 17:30</div></div>
+<div class="match-row"><div class="match-teams">Brentford – Everton</div><div class="match-date">Lun 23 · 21:00</div></div>
+</article>
+<article class="league-fixtures"><h3>🇪🇸 La Liga</h3><div class="round-label">Prossimo turno · 20–23 novembre</div>
+<div class="match-row"><div class="match-teams">Athletic Club – Espanyol</div><div class="match-date">Ven 20 · 21:00</div></div>
+<div class="match-row"><div class="match-teams">Alavés – Deportivo</div><div class="match-date">Sab 21 · 14:00</div></div>
+<div class="match-row"><div class="match-teams">Rayo Vallecano – Valencia</div><div class="match-date">Sab 21 · 16:15</div></div>
+<div class="match-row"><div class="match-teams">Sevilla – Real Betis</div><div class="match-date">Sab 21 · 18:30</div></div>
+<div class="match-row"><div class="match-teams">Real Madrid – Celta</div><div class="match-date">Sab 21 · 21:00</div></div>
+<div class="match-row"><div class="match-teams">Barcelona – Villarreal</div><div class="match-date">Dom 22 · 14:00</div></div>
+<div class="match-row"><div class="match-teams">Racing – Real Sociedad</div><div class="match-date">Dom 22 · 16:15</div></div>
+<div class="match-row"><div class="match-teams">Osasuna – Málaga</div><div class="match-date">Dom 22 · 18:30</div></div>
+<div class="match-row"><div class="match-teams">Getafe – Atlético Madrid</div><div class="match-date">Dom 22 · 21:00</div></div>
+<div class="match-row"><div class="match-teams">Levante – Elche</div><div class="match-date">Lun 23 · 21:00</div></div>
+</article>
 </div>
+<div class="note">Orari locali italiani. Sono mostrati esclusivamente gli incontri del prossimo turno per ciascun campionato; gli orari possono subire variazioni ufficiali.</div>
+</section>
 <section id="info" class="note" style="margin-top:24px"><strong style="color:var(--text)">Informazioni</strong><br>Analisi Calcio è una pagina informativa dimostrativa dedicata alle statistiche sportive. I valori mostrati sono esempi e non costituiscono dati live.</section>
 </main><footer>© 2026 Analisi Calcio · Progetto indipendente</footer>
 </body></html>
