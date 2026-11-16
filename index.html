@@ -331,7 +331,7 @@ footer{margin-left:248px}
   if(button)button.disabled=true;
   summary.textContent='Aggiornamento delle partite in corso…';
   try{
-   const response=await fetch(API_BASE.replace(/\\/$/,'')+'/fixtures/live',{headers:{'Accept':'application/json'}});
+   const response=await fetch(API_BASE.replace(/\/$/,'')+'/fixtures/live',{headers:{'Accept':'application/json'}});
    if(!response.ok)throw new Error('HTTP '+response.status);
    const payload=await response.json();
    if(payload.errors&&Object.keys(payload.errors).length)throw new Error('Errore della fonte dati');
@@ -363,7 +363,7 @@ footer{margin-left:248px}
     const minute=document.createElement('span');minute.className='live-minute';
     minute.textContent=elapsed!=null?String(elapsed)+'′':(status==='HT'?'Intervallo':status==='PEN'?'Rigori':'In corso');
     const row=document.createElement('div');row.className='match-row';row.dataset.home=home;row.dataset.away=away;row.dataset.originalTeams=home+' – '+away;row.dataset.leagueId=leagueId;row.dataset.date=f.fixture?.date?.slice(0,10)||'';
-    const kickoff=document.createElement('div');kickoff.className='match-date';kickoff.textContent=minute.textContent;
+    const kickoff=document.createElement('div');kickoff.className='match-date';kickoff.textContent=minute.textContent;row.append(kickoff);
     const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';btn.addEventListener('click',()=>show(row,league));
     meta.append(minute,btn);
     card.append(head,teams,meta);list.append(card);
