@@ -269,7 +269,7 @@ footer{margin-left:248px}
  function currentFixtureQuery(){
   const league=document.getElementById('detailLeague').textContent;
   const dateText=document.getElementById('detailKickoff').textContent;
-  const dayMatch=dateText.match(/(?:Ven|Sab|Dom|Lun)\\s+(\\d{1,2})/i);
+  const dayMatch=dateText.match(/(?:Ven|Sab|Dom|Lun)\s+(\d{1,2})/i);
   const leagueId=league.includes('Serie A')?135:league.includes('Premier')?39:140;
   if(!dayMatch)return null;
   const day=String(dayMatch[1]).padStart(2,'0');
@@ -281,13 +281,13 @@ footer{margin-left:248px}
   const button=document.getElementById('refreshLive');button.disabled=true;
   document.getElementById('liveMessage').textContent='Ricerca dei dati ufficiali in corso…';
   try{
-   const url=API_BASE.replace(/\\/$/,'')+'/fixtures?league='+query.leagueId+'&season='+query.season+'&date='+query.date;
+   const url=API_BASE.replace(/\/$/,'')+'/fixtures?league='+query.leagueId+'&season='+query.season+'&date='+query.date;
    const response=await fetch(url,{headers:{'Accept':'application/json'}});
    if(!response.ok)throw new Error('HTTP '+response.status);
    const payload=await response.json();
    const fixtures=Array.isArray(payload.response)?payload.response:[];
    const home=clean(document.getElementById('detailHome').textContent),away=clean(document.getElementById('detailAway').textContent);
-   const found=fixtures.find(f=>clean(f.teams?.home?.name)===home&&clean(f.teams?.away?.name)===away);
+   const found=fixtures.find(f=>clean(f.teams?.home?.name)===clean(aliases[document.getElementById('detailHome').textContent.toLowerCase()]||document.getElementById('detailHome').textContent)&&clean(f.teams?.away?.name)===clean(aliases[document.getElementById('detailAway').textContent.toLowerCase()]||document.getElementById('detailAway').textContent));
    if(!found){selectedFixture=null;document.getElementById('liveState').textContent='DATO NON DISPONIBILE';document.getElementById('liveScore').textContent='— : —';document.getElementById('liveMessage').textContent='La fonte non ha restituito questa partita per la data indicata. Calendario e copertura devono essere verificati.';return;}
    selectedFixture=found;
    const status=found.fixture?.status?.short||'';
