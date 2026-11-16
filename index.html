@@ -165,7 +165,13 @@ footer{margin-left:248px}
   const key=title.includes('Serie A')?'Italian_Serie_A':title.includes('Premier')?'English_Premier_League':'Spanish_La_Liga';
   try{
    const response=await fetch(api+'search_all_teams.php?l='+encodeURIComponent(key));
-   if(response.ok){const data=await response.json();(data.teams||[]).forEach(t=>{if(t.strTeam&&t.strBadge)badgeCache.set(clean(t.strTeam),t.strBadge);});}
+   if(response.ok){const data=await response.json();(data.teams||[]).forEach(t=>{
+    const badge=t.strBadge||t.strTeamBadge||t.strTeamLogo||'';
+    if(!badge)return;
+    [t.strTeam,t.strTeamAlternate].filter(Boolean).forEach(n=>{
+     n.split(',').forEach(alias=>badgeCache.set(clean(alias),badge));
+    });
+   });}
   }catch(e){/* Stemmi non raggiungibili: si mostrano le iniziali */ }
   card.querySelectorAll('.match-row').forEach(row=>{
    const names=row.dataset.originalTeams.split(' – ');
@@ -174,7 +180,8 @@ footer{margin-left:248px}
    names.forEach((name,i)=>{
     const side=document.createElement('span');side.className='team-side';
     const alias=aliases[name.toLowerCase()]||name;
-    const url=badgeCache.get(clean(name))||badgeCache.get(clean(alias));
+    const key=clean(name),aliasKey=clean(alias);
+    const url=badgeCache.get(key)||badgeCache.get(aliasKey)||[...badgeCache.entries()].find(([k])=>k.startsWith(key)||key.startsWith(k))?.[1];
     let crest;
     if(url){crest=document.createElement('img');crest.className='club-badge';crest.src=url;crest.alt='Stemma '+name;crest.loading='lazy';crest.onerror=()=>crest.replaceWith(fallback(name));}
     else crest=fallback(name);
@@ -197,7 +204,8 @@ footer{margin-left:248px}
   const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
   [home,away].forEach((name,i)=>{
    const wrap=document.createElement('div');wrap.className='detail-club';
-   const url=badgeCache.get(clean(name))||badgeCache.get(clean(aliases[name.toLowerCase()]||''));
+   const key=clean(name),aliasKey=clean(aliases[name.toLowerCase()]||'');
+   const url=badgeCache.get(key)||badgeCache.get(aliasKey)||[...badgeCache.entries()].find(([k])=>k.startsWith(key)||key.startsWith(k))?.[1];
    if(url){const img=document.createElement('img');img.src=url;img.alt='Stemma '+name;img.onerror=()=>img.replaceWith(fallback(name));wrap.append(img);}else wrap.append(fallback(name));
    const label=document.createElement('span');label.textContent=name;wrap.append(label);clubs.append(wrap);
    if(i===0){const vs=document.createElement('span');vs.className='detail-vs';vs.textContent='VS';clubs.append(vs);}
