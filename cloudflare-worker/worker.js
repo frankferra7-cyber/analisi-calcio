@@ -1,7 +1,7 @@
 const ALLOWED_ORIGINS = new Set([
   "https://frankferra7-cyber.github.io"
 ]);
-const ALLOWED_LEAGUES = new Set(["39", "135", "140"]);
+const ALLOWED_LEAGUES = new Set(["39", "135", "140", "61", "78", "2"]);
 const API_ROOT = "https://v3.football.api-sports.io";
 
 function corsHeaders(origin) {
@@ -47,7 +47,7 @@ export default {
       const date = url.searchParams.get("date") || "";
       const home = (url.searchParams.get("home") || "").trim();
       const away = (url.searchParams.get("away") || "").trim();
-      if (!/^2026-11-\d{2}$/.test(date) || !home || !away || home.length > 80 || away.length > 80) return json({ error: "Invalid lineup query" }, 400, origin);
+      if (!/^20\d{2}-\d{2}-\d{2}$/.test(date) || !home || !away || home.length > 80 || away.length > 80) return json({ error: "Invalid lineup query" }, 400, origin);
       requiredSecret = "PITCHAPI_KEY";
       upstreamPath = "/v1/date/" + date + "?status=upcoming";
       cacheSeconds = 60;
@@ -55,10 +55,13 @@ export default {
       const league = url.searchParams.get("league") || "";
       const season = url.searchParams.get("season") || "";
       const date = url.searchParams.get("date") || "";
-      if (!ALLOWED_LEAGUES.has(league) || season !== "2026" || !/^2026-11-\d{2}$/.test(date)) {
+      const next = url.searchParams.get("next") || "";
+      const validDate = /^20\d{2}-\d{2}-\d{2}$/.test(date);
+      const validNext = /^([1-9]|1\d|20)$/.test(next);
+      if (!ALLOWED_LEAGUES.has(league) || season !== "2026" || !(validDate || (!date && validNext))) {
         return json({ error: "Invalid fixture query" }, 400, origin);
       }
-      upstreamPath = "/fixtures?league=" + league + "&season=" + season + "&date=" + date;
+      upstreamPath = "/fixtures?league=" + league + "&season=" + season + (date ? "&date=" + date : "&next=" + next);
       cacheSeconds = 30;
     } else if (url.pathname === "/fixtures/lineups") {
       const fixture = url.searchParams.get("fixture") || "";
