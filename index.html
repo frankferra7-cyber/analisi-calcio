@@ -15,6 +15,9 @@ main{max-width:1160px;margin:auto;padding:34px 22px 60px}.hero{padding:32px;bord
 .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:30px 0 14px}.section-head h2{margin:0;font-size:21px}.section-head span{color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:19px}.card h3{margin:0 0 5px;font-size:16px}.muted{color:var(--muted)}.metric{font-size:30px;font-weight:800;letter-spacing:-1px;margin:12px 0 0}.tag{display:inline-block;padding:4px 8px;border-radius:7px;background:#24364b;color:var(--blue);font-size:11px;font-weight:700}.split{display:grid;grid-template-columns:1.25fr .75fr;gap:15px}.table{width:100%;border-collapse:collapse;margin-top:12px}.table th,.table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-size:12px;font-weight:600}.table td:last-child,.table th:last-child{text-align:right}.fixture{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.fixture:last-child{border:0}.teams{font-weight:650}.time{color:var(--muted);font-size:12px;white-space:nowrap}.note{padding:14px 16px;border-radius:12px;background:#17283c;color:var(--muted);font-size:13px;margin-top:16px}footer{border-top:1px solid var(--line);color:var(--muted);text-align:center;padding:22px;font-size:12px}
 .matchday-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.league-fixtures{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}.league-fixtures h3{margin:0 0 5px}.round-label{font-size:12px;color:var(--green);font-weight:750;margin-bottom:12px}.match-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.match-row:last-child{border:0}.match-teams{font-size:13px;font-weight:650}.match-date{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}@media(max-width:900px){.matchday-grid{grid-template-columns:1fr}}\n@media(max-width:760px){.nav{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.split{grid-template-columns:1fr}.hero{padding:25px}.section-head{align-items:start;flex-direction:column}}
+
+.details-btn{border:1px solid #49627e;background:#1b3048;color:var(--green);border-radius:8px;padding:7px 10px;font-weight:750;font-size:11px;cursor:pointer;white-space:nowrap}.details-btn:hover{background:#29435f}
+.match-detail{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto;padding:22px;display:none}.match-detail.open{display:block}.detail-inner{max-width:850px;margin:0 auto}.back-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:10px 14px;cursor:pointer}.detail-hero{margin-top:22px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.detail-teams{font-size:clamp(24px,5vw,38px);font-weight:850;line-height:1.2;margin:12px 0}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.detail-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px}.detail-item small{display:block;color:var(--muted);margin-bottom:4px}@media(max-width:560px){.detail-grid{grid-template-columns:1fr}.match-row{align-items:flex-start}.match-teams{max-width:58%}}
 </style>
 </head>
 <body>
@@ -76,5 +79,55 @@ main{max-width:1160px;margin:auto;padding:34px 22px 60px}.hero{padding:32px;bord
 <div class="note">Orari locali italiani. Sono mostrati esclusivamente gli incontri del prossimo turno per ciascun campionato; gli orari possono subire variazioni ufficiali.</div>
 </section>
 <section id="info" class="note" style="margin-top:24px"><strong style="color:var(--text)">Informazioni</strong><br>Analisi Calcio è una pagina informativa dimostrativa dedicata alle statistiche sportive. I valori mostrati sono esempi e non costituiscono dati live.</section>
-</main><footer>© 2026 Analisi Calcio · Progetto indipendente</footer>
+</main>
+<section class="match-detail" id="matchDetail" aria-hidden="true">
+ <div class="detail-inner">
+  <button class="back-btn" id="backToCalendar">← Torna al calendario</button>
+  <div class="detail-hero">
+   <div class="eyebrow" id="detailLeague">CAMPIONATO</div>
+   <div class="detail-teams" id="detailTeams">Partita</div>
+   <div class="muted" id="detailKickoff"></div>
+  </div>
+  <div class="section-head"><h2>Dettagli incontro</h2><span>Scheda informativa</span></div>
+  <div class="detail-grid">
+   <div class="detail-item"><small>Competizione</small><strong id="detailCompetition">—</strong></div>
+   <div class="detail-item"><small>Data e ora</small><strong id="detailDate">—</strong></div>
+   <div class="detail-item"><small>Squadra di casa</small><strong id="detailHome">—</strong></div>
+   <div class="detail-item"><small>Squadra ospite</small><strong id="detailAway">—</strong></div>
+  </div>
+  <div class="note">Le statistiche avanzate e i dati in tempo reale non sono ancora collegati a una fonte dati: questa scheda mostra le informazioni della partita già presenti nel calendario.</div>
+ </div>
+</section>
+<footer>© 2026 Analisi Calcio · Progetto indipendente</footer>
+
+<script>
+(function(){
+ const detail=document.getElementById('matchDetail');
+ const leagueCards=document.querySelectorAll('.league-fixtures');
+ function show(row,league){
+  const teams=row.querySelector('.match-teams').textContent.trim();
+  const kickoff=row.querySelector('.match-date').textContent.trim();
+  const parts=teams.split(' – ');
+  document.getElementById('detailLeague').textContent=league;
+  document.getElementById('detailTeams').textContent=teams;
+  document.getElementById('detailKickoff').textContent=kickoff;
+  document.getElementById('detailCompetition').textContent=league;
+  document.getElementById('detailDate').textContent=kickoff;
+  document.getElementById('detailHome').textContent=parts[0]||'—';
+  document.getElementById('detailAway').textContent=parts[1]||'—';
+  detail.classList.add('open');detail.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';detail.scrollTop=0;
+ }
+ leagueCards.forEach(card=>{
+  const league=card.querySelector('h3').textContent.trim();
+  card.querySelectorAll('.match-row').forEach(row=>{
+   const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';
+   btn.addEventListener('click',()=>show(row,league));row.appendChild(btn);
+  });
+ });
+ function close(){detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+ document.getElementById('backToCalendar').addEventListener('click',close);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&detail.classList.contains('open'))close();});
+})();
+</script>
 </body></html>
