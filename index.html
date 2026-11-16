@@ -158,7 +158,6 @@ footer{margin-left:248px}
  const api='https://www.thesportsdb.com/api/v1/json/123/';
  const badgeCache=new Map();
  const clean=s=>(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
- const aliases={'deportivo':'Deportivo La Coruna','racing':'Racing Santander','athletic club':'Athletic Bilbao','manchester city':'Manchester City','manchester united':'Manchester United','newcastle':'Newcastle United','brighton':'Brighton and Hove Albion'};
  function fallback(name){const el=document.createElement('span');el.className='club-fallback';el.textContent=name.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();el.setAttribute('aria-label','Stemma non disponibile per '+name);return el;}
  async function loadLeagueBadges(card){
   const title=card.querySelector('h3').textContent.trim();
@@ -179,9 +178,9 @@ footer{margin-left:248px}
    const pair=document.createElement('div');pair.className='team-pair';
    names.forEach((name,i)=>{
     const side=document.createElement('span');side.className='team-side';
-    const alias=aliases[name.toLowerCase()]||name;
-    const key=clean(name),aliasKey=clean(alias);
-    const url=badgeCache.get(key)||badgeCache.get(aliasKey)||[...badgeCache.entries()].find(([k])=>k.startsWith(key)||key.startsWith(k))?.[1];
+    const key=clean(name);
+    // Solo corrispondenza esatta: niente stemmi assegnati per somiglianza.
+    const url=badgeCache.get(key);
     let crest;
     if(url){crest=document.createElement('img');crest.className='club-badge';crest.src=url;crest.alt='Stemma '+name;crest.loading='lazy';crest.onerror=()=>crest.replaceWith(fallback(name));}
     else crest=fallback(name);
@@ -204,8 +203,9 @@ footer{margin-left:248px}
   const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
   [home,away].forEach((name,i)=>{
    const wrap=document.createElement('div');wrap.className='detail-club';
-   const key=clean(name),aliasKey=clean(aliases[name.toLowerCase()]||'');
-   const url=badgeCache.get(key)||badgeCache.get(aliasKey)||[...badgeCache.entries()].find(([k])=>k.startsWith(key)||key.startsWith(k))?.[1];
+   const key=clean(name);
+   // Mantiene la stessa corrispondenza esatta usata nel calendario.
+   const url=badgeCache.get(key);
    if(url){const img=document.createElement('img');img.src=url;img.alt='Stemma '+name;img.onerror=()=>img.replaceWith(fallback(name));wrap.append(img);}else wrap.append(fallback(name));
    const label=document.createElement('span');label.textContent=name;wrap.append(label);clubs.append(wrap);
    if(i===0){const vs=document.createElement('span');vs.className='detail-vs';vs.textContent='VS';clubs.append(vs);}
