@@ -39,14 +39,19 @@ export default {
     if (!ALLOWED_ORIGINS.has(origin)) {
       return json({ error: "Origin not allowed" }, 403, origin);
     }
-    if (!env.API_FOOTBALL_KEY) {
-      return json({ error: "Server API key is not configured" }, 503, origin);
-    }
-
     let upstreamPath;
     let cacheSeconds = 30;
+    let requiredSecret = "API_FOOTBALL_KEY";
 
-    if (url.pathname === "/fixtures") {
+    if (url.pathname === "/pitchapi/lineups") {
+      const date = url.searchParams.get("date") || "";
+      const home = (url.searchParams.get("home") || "").trim();
+      const away = (url.searchParams.get("away") || "").trim();
+      if (!/^2026-11-\d{2}$/.test(date) || !home || !away || home.length > 80 || away.length > 80) return json({ error: "Invalid lineup query" }, 400, origin);
+      requiredSecret = "PITCHAPI_KEY";
+      upstreamPath = "/v1/date/" + date + "?status=upcoming";
+      cacheSeconds = 60;
+    } else if (url.pathname === "/fixtures") {
       const league = url.searchParams.get("league") || "";
       const season = url.searchParams.get("season") || "";
       const date = url.searchParams.get("date") || "";
@@ -66,6 +71,8 @@ export default {
       return json({ error: "Not found" }, 404, origin);
     }
 
+    if (!env[requiredSecret]) return json({ error: "Server secret " + requiredSecret + " is not configured" }, 503, origin);
+
     const cacheUrl = new URL(url.pathname + url.search, "https://worker-cache.invalid");
     const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
     const cache = caches.default;
@@ -77,13 +84,29 @@ export default {
     }
 
     try {
-      const upstream = await fetch(API_ROOT + upstreamPath, {
-        headers: { "x-apisports-key": env.API_FOOTBALL_KEY, "Accept": "application/json" }
+      const isPitch = url.pathname === "/pitchapi/lineups";
+      const upstream = await fetch((isPitch ? "https://api.pitchapi.dev" : API_ROOT) + upstreamPath, {
+        headers: isPitch ? { "X-API-KEY": env.PITCHAPI_KEY, "Accept": "application/json" } : { "x-apisports-key": env.API_FOOTBALL_KEY, "Accept": "application/json" }
       });
       if (!upstream.ok) {
         return json({ error: "Football data provider returned an error", providerStatus: upstream.status }, 502, origin);
       }
       const payload = await upstream.json();
+      if (isPitch) {
+        if (payload.error) return json({ error: payload.error.message || "PitchAPI error", code: payload.error.code || "PITCHAPI_ERROR" }, upstream.status, origin);
+        const matches = payload.data && payload.data.matches || [];
+        const norm = value => (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|ac|afc|ssc|as|ud|calcio|club)\b/g, "").replace(/[^a-z0-9]/g, "");
+        const home = norm(url.searchParams.get("home"));
+        const away = norm(url.searchParams.get("away"));
+        const match = matches.find(item => norm(item.home_team && item.home_team.name) === home && norm(item.away_team && item.away_team.name) === away);
+        if (!match) return json({ error: "Partita non trovata nel calendario PitchAPI per questa data." }, 404, origin);
+        const lr = await fetch("https://api.pitchapi.dev/v1/matches/" + encodeURIComponent(match.id) + "/lineups", { headers: { "X-API-KEY": env.PITCHAPI_KEY, "Accept": "application/json" } });
+        const lp = await lr.json();
+        if (!lr.ok || lp.error) return json({ error: lp.error && lp.error.message || "Formazioni non disponibili", code: lp.error && lp.error.code || "LINEUPS_UNAVAILABLE" }, lr.status, origin);
+        const response = json({ match: match, lineups: lp.data }, 200, origin, { "Cache-Control": "public, max-age=" + cacheSeconds });
+        ctx.waitUntil(cache.put(cacheKey, response.clone()));
+        return response;
+      }
       const response = json(payload, 200, origin, { "Cache-Control": "public, max-age=" + cacheSeconds });
       ctx.waitUntil(cache.put(cacheKey, response.clone()));
       return response;
