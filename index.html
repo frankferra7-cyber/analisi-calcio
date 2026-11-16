@@ -70,6 +70,7 @@ footer{margin-left:248px}
 @media(max-width:560px){.team-pair{gap:5px}.team-side{gap:4px}.club-badge,.club-fallback{width:28px;height:28px;flex-basis:28px}.team-name{font-size:10px}.detail-club img,.detail-club .club-fallback{width:62px;height:62px}}
 
 
+.live-panel{margin:16px 0;padding:17px;border:1px solid #2b4056;border-radius:15px;background:linear-gradient(145deg,#101d30,#0a1423)}.live-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.live-state{font-size:11px;font-weight:900;letter-spacing:.7px;color:var(--muted);text-transform:uppercase}.live-score{font-size:27px;font-weight:900;letter-spacing:1px;margin:7px 0}.live-message{font-size:13px;color:var(--muted)}.live-refresh{border:1px solid #5d821f;background:#172715;color:var(--green);padding:8px 12px;border-radius:9px;font-weight:850;cursor:pointer}.live-refresh:disabled{opacity:.55;cursor:wait}
 .detail-tabs{display:flex;gap:8px;margin:24px 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}.detail-tab{border:1px solid var(--line);background:#0c1728;color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}.detail-tab.active{background:#192a16;color:var(--green);border-color:#587c22}.tab-panel[hidden]{display:none}.lineup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.lineup-card{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #24384e;border-radius:16px;padding:18px}.lineup-card h3{margin:0 0 5px}.lineup-module{display:inline-block;color:var(--green);background:#1a2c16;border:1px solid #38531b;border-radius:7px;padding:4px 8px;font-size:12px;font-weight:850;margin:8px 0}.lineup-empty{margin-top:12px;padding:14px;border:1px dashed #38506a;border-radius:11px;color:var(--muted);font-size:13px}.lineup-status{font-size:11px;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.7px}@media(max-width:560px){.lineup-grid{grid-template-columns:1fr}.detail-tabs{overflow-x:auto}}
 </style>
 </head>
@@ -141,6 +142,10 @@ footer{margin-left:248px}
    <div class="detail-clubs" id="detailClubs"></div><div class="detail-teams" id="detailTeams">Partita</div>
    <div class="muted" id="detailKickoff"></div>
   </div>
+  <section class="live-panel" aria-live="polite">
+   <div class="live-top"><div><div class="live-state" id="liveState">FONTE NON COLLEGATA</div><div class="live-score" id="liveScore">— : —</div></div><button class="live-refresh" id="refreshLive" type="button">Aggiorna dati</button></div>
+   <div class="live-message" id="liveMessage">Il collegamento ai dati live sarà attivato quando sarà configurato il servizio sicuro. Nessun risultato viene simulato.</div>
+  </section>
   <div class="detail-tabs" role="tablist" aria-label="Sezioni partita">
    <button class="detail-tab active" id="tabMatchDetails" type="button" role="tab" aria-selected="true">Dettagli incontro</button>
    <button class="detail-tab" id="tabLineups" type="button" role="tab" aria-selected="false">Probabili formazioni</button>
@@ -169,6 +174,8 @@ footer{margin-left:248px}
 (function(){
  const detail=document.getElementById('matchDetail');
  const leagueCards=document.querySelectorAll('.league-fixtures');
+ // Inserire qui l'URL del proxy sicuro (es. Cloudflare Worker), mai la chiave API.
+ const API_BASE='';
  const api='https://www.thesportsdb.com/api/v1/json/123/';
  const badgeCache=new Map();
  const clean=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -219,6 +226,7 @@ footer{margin-left:248px}
   document.getElementById('lineupHomeName').textContent=home||'—';
   document.getElementById('lineupAwayName').textContent=away||'—';
   setDetailTab('details');
+  resetLivePanel();
   const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
   [home,away].forEach((name,i)=>{
    const wrap=document.createElement('div');wrap.className='detail-club';
@@ -248,7 +256,65 @@ footer{margin-left:248px}
   document.getElementById('panelLineups').hidden=details;
  }
  document.getElementById('tabMatchDetails').addEventListener('click',()=>setDetailTab('details'));
- document.getElementById('tabLineups').addEventListener('click',()=>setDetailTab('lineups'));
+ document.getElementById('tabLineups').addEventListener('click',()=>{setDetailTab('lineups');loadLineups();});
+ document.getElementById('refreshLive').addEventListener('click',loadLiveFixture);
+ let selectedFixture=null;
+ function resetLivePanel(){
+  selectedFixture=null;
+  document.getElementById('liveState').textContent='FONTE NON COLLEGATA';
+  document.getElementById('liveScore').textContent='— : —';
+  document.getElementById('liveMessage').textContent=API_BASE?'Premi “Aggiorna dati” per cercare il risultato nella fonte collegata.':'Il collegamento ai dati live sarà attivato quando sarà configurato il servizio sicuro. Nessun risultato viene simulato.';
+  document.getElementById('refreshLive').disabled=false;
+ }
+ function currentFixtureQuery(){
+  const league=document.getElementById('detailLeague').textContent;
+  const dateText=document.getElementById('detailKickoff').textContent;
+  const dayMatch=dateText.match(/(?:Ven|Sab|Dom|Lun)\\s+(\\d{1,2})/i);
+  const leagueId=league.includes('Serie A')?135:league.includes('Premier')?39:140;
+  if(!dayMatch)return null;
+  const day=String(dayMatch[1]).padStart(2,'0');
+  return {leagueId,date:'2026-11-'+day,season:2026};
+ }
+ async function loadLiveFixture(){
+  if(!API_BASE){document.getElementById('liveMessage').textContent='Configurazione mancante: serve l’URL del proxy sicuro. La chiave API non deve mai essere inserita in questa pagina pubblica.';return;}
+  const query=currentFixtureQuery();if(!query){document.getElementById('liveMessage').textContent='Data della partita non riconosciuta.';return;}
+  const button=document.getElementById('refreshLive');button.disabled=true;
+  document.getElementById('liveMessage').textContent='Ricerca dei dati ufficiali in corso…';
+  try{
+   const url=API_BASE.replace(/\\/$/,'')+'/fixtures?league='+query.leagueId+'&season='+query.season+'&date='+query.date;
+   const response=await fetch(url,{headers:{'Accept':'application/json'}});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const payload=await response.json();
+   const fixtures=Array.isArray(payload.response)?payload.response:[];
+   const home=clean(document.getElementById('detailHome').textContent),away=clean(document.getElementById('detailAway').textContent);
+   const found=fixtures.find(f=>clean(f.teams?.home?.name)===home&&clean(f.teams?.away?.name)===away);
+   if(!found){selectedFixture=null;document.getElementById('liveState').textContent='DATO NON DISPONIBILE';document.getElementById('liveScore').textContent='— : —';document.getElementById('liveMessage').textContent='La fonte non ha restituito questa partita per la data indicata. Calendario e copertura devono essere verificati.';return;}
+   selectedFixture=found;
+   const status=found.fixture?.status?.short||'';
+   document.getElementById('liveState').textContent=({'1H':'IN CORSO','HT':'INTERVALLO','2H':'IN CORSO','ET':'SUPPLEMENTARI','P':'IN ATTESA','FT':'TERMINATA','AET':'TERMINATA','PEN':'RIGORI','NS':'NON INIZIATA','PST':'RINVIATA','CANC':'ANNULLATA'})[status]||'AGGIORNAMENTO';
+   document.getElementById('liveScore').textContent=(found.goals?.home??'—')+' : '+(found.goals?.away??'—');
+   document.getElementById('liveMessage').textContent='Fonte collegata · '+(found.fixture?.status?.long||'Stato non specificato')+(found.fixture?.status?.elapsed!=null?' · '+found.fixture.status.elapsed+'′':'');
+  }catch(error){document.getElementById('liveState').textContent='ERRORE DI COLLEGAMENTO';document.getElementById('liveMessage').textContent='Non è stato possibile leggere i dati. Verifica proxy, copertura e configurazione.';}
+  finally{button.disabled=false;}
+ }
+ async function loadLineups(){
+  const boxes=document.querySelectorAll('.lineup-card .lineup-empty');
+  if(!API_BASE||!selectedFixture?.fixture?.id){boxes.forEach(el=>el.textContent='Formazioni non disponibili: collega il proxy sicuro e carica prima i dati della partita.');return;}
+  boxes.forEach(el=>el.textContent='Caricamento formazioni dalla fonte…');
+  try{
+   const response=await fetch(API_BASE.replace(/\\/$/,'')+'/fixtures/lineups?fixture='+selectedFixture.fixture.id,{headers:{'Accept':'application/json'}});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const payload=await response.json(),lineups=Array.isArray(payload.response)?payload.response:[];
+   [0,1].forEach(i=>{
+    const entry=lineups[i],box=boxes[i];
+    if(!entry){box.textContent='Formazione non pubblicata o non coperta dalla fonte.';return;}
+    const players=(entry.startXI||[]).map(p=>p.player?.name).filter(Boolean);
+    const subs=(entry.substitutes||[]).map(p=>p.player?.name).filter(Boolean);
+    box.textContent=players.length?'Titolari: '+players.join(', ')+(subs.length?' · Panchina: '+subs.join(', '):''):'La fonte non ha ancora pubblicato i nomi dei giocatori.';
+    const module=box.parentElement.querySelector('.lineup-module');if(module)module.textContent='Modulo: '+(entry.formation||'non comunicato');
+   });
+  }catch(error){boxes.forEach(el=>el.textContent='Errore nel recupero delle formazioni. Verifica il servizio di collegamento.');}
+ }
  function close(){detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
  document.getElementById('backToCalendar').addEventListener('click',close);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&detail.classList.contains('open'))close();});
