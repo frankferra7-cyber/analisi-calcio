@@ -302,7 +302,7 @@ footer{margin-left:248px}
   if(!API_BASE||!selectedFixture?.fixture?.id){boxes.forEach(el=>el.textContent='Formazioni non disponibili: collega il proxy sicuro e carica prima i dati della partita.');return;}
   boxes.forEach(el=>el.textContent='Caricamento formazioni dalla fonte…');
   try{
-   const response=await fetch(API_BASE.replace(/\\/$/,'')+'/fixtures/lineups?fixture='+selectedFixture.fixture.id,{headers:{'Accept':'application/json'}});
+   const response=await fetch(API_BASE.replace(/\/$/,'')+'/fixtures/lineups?fixture='+selectedFixture.fixture.id,{headers:{'Accept':'application/json'}});
    if(!response.ok)throw new Error('HTTP '+response.status);
    const payload=await response.json(),lineups=Array.isArray(payload.response)?payload.response:[];
    [0,1].forEach(i=>{
