@@ -60,6 +60,15 @@ footer{margin-left:248px}
  footer{margin-left:0}
  .hero{padding:26px}
 }
+
+/* Stemmi e loghi */
+.club-badge{width:34px;height:34px;object-fit:contain;flex:0 0 34px;padding:3px;border-radius:10px;background:#f4f7fb;box-shadow:0 0 14px #b7ff0015}
+.club-fallback{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid #547322;border-radius:10px;background:#172715;color:var(--green);font-size:10px;font-weight:900}
+.team-pair{display:flex;align-items:center;gap:8px;min-width:0}.team-side{display:flex;align-items:center;gap:6px;min-width:0}.team-name{font-size:12px;font-weight:700;line-height:1.25}.versus{color:var(--green);font-size:10px;font-weight:900}
+.league-title{display:flex;align-items:center;gap:10px}.league-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#182719;color:var(--green);font-size:22px}
+.detail-clubs{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 8px}.detail-club{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:42%;text-align:center;font-weight:800}.detail-club img{width:76px;height:76px;object-fit:contain;padding:7px;border-radius:18px;background:#f5f7fa}.detail-club .club-fallback{width:76px;height:76px;font-size:18px;border-radius:18px}.detail-vs{color:var(--green);font-size:17px;font-weight:950}
+@media(max-width:560px){.team-pair{gap:5px}.team-side{gap:4px}.club-badge,.club-fallback{width:28px;height:28px;flex-basis:28px}.team-name{font-size:10px}.detail-club img,.detail-club .club-fallback{width:62px;height:62px}}
+
 </style>
 </head>
 <body>
@@ -74,9 +83,9 @@ footer{margin-left:248px}
 </section>
 <div class="section-head" id="campionati"><h2>Campionati</h2><span>Competizioni da seguire</span></div>
 <section class="grid">
-<article class="card"><h3>🇮🇹 Serie A</h3><p class="muted">Classifica, rendimento casa/trasferta e statistiche di squadra.</p></article>
-<article class="card"><h3>🏴 Premier League</h3><p class="muted">Risultati, forma recente e confronto tra club.</p></article>
-<article class="card"><h3>🇪🇸 La Liga</h3><p class="muted">Andamento del campionato e indicatori collettivi.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> Serie A</h3><p class="muted">Classifica, rendimento casa/trasferta e statistiche di squadra.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> Premier League</h3><p class="muted">Risultati, forma recente e confronto tra club.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> La Liga</h3><p class="muted">Andamento del campionato e indicatori collettivi.</p></article>
 </section>
 <section id="calendario">
 <div class="section-head"><h2>Prossima giornata</h2><span>Solo il prossimo turno · stagione 2026/27</span></div>
@@ -127,7 +136,7 @@ footer{margin-left:248px}
   <button class="back-btn" id="backToCalendar">← Torna al calendario</button>
   <div class="detail-hero">
    <div class="eyebrow" id="detailLeague">CAMPIONATO</div>
-   <div class="detail-teams" id="detailTeams">Partita</div>
+   <div class="detail-clubs" id="detailClubs"></div><div class="detail-teams" id="detailTeams">Partita</div>
    <div class="muted" id="detailKickoff"></div>
   </div>
   <div class="section-head"><h2>Dettagli incontro</h2><span>Scheda informativa</span></div>
@@ -146,26 +155,63 @@ footer{margin-left:248px}
 (function(){
  const detail=document.getElementById('matchDetail');
  const leagueCards=document.querySelectorAll('.league-fixtures');
+ const api='https://www.thesportsdb.com/api/v1/json/123/';
+ const badgeCache=new Map();
+ const clean=s=>(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const aliases={'deportivo':'Deportivo La Coruna','racing':'Racing Santander','athletic club':'Athletic Bilbao','manchester city':'Manchester City','manchester united':'Manchester United','newcastle':'Newcastle United','brighton':'Brighton and Hove Albion'};
+ function fallback(name){const el=document.createElement('span');el.className='club-fallback';el.textContent=name.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();el.setAttribute('aria-label','Stemma non disponibile per '+name);return el;}
+ async function loadLeagueBadges(card){
+  const title=card.querySelector('h3').textContent.trim();
+  const key=title.includes('Serie A')?'Italian_Serie_A':title.includes('Premier')?'English_Premier_League':'Spanish_La_Liga';
+  try{
+   const response=await fetch(api+'search_all_teams.php?l='+encodeURIComponent(key));
+   if(response.ok){const data=await response.json();(data.teams||[]).forEach(t=>{if(t.strTeam&&t.strBadge)badgeCache.set(clean(t.strTeam),t.strBadge);});}
+  }catch(e){/* Stemmi non raggiungibili: si mostrano le iniziali */ }
+  card.querySelectorAll('.match-row').forEach(row=>{
+   const names=row.dataset.originalTeams.split(' – ');
+   if(names.length!==2)return;
+   const pair=document.createElement('div');pair.className='team-pair';
+   names.forEach((name,i)=>{
+    const side=document.createElement('span');side.className='team-side';
+    const alias=aliases[name.toLowerCase()]||name;
+    const url=badgeCache.get(clean(name))||badgeCache.get(clean(alias));
+    let crest;
+    if(url){crest=document.createElement('img');crest.className='club-badge';crest.src=url;crest.alt='Stemma '+name;crest.loading='lazy';crest.onerror=()=>crest.replaceWith(fallback(name));}
+    else crest=fallback(name);
+    const label=document.createElement('span');label.className='team-name';label.textContent=name;
+    side.append(crest,label);pair.append(side);
+    if(i===0){const vs=document.createElement('span');vs.className='versus';vs.textContent='VS';pair.append(vs);}
+   });
+   const target=row.querySelector('.match-teams');if(target)target.replaceWith(pair);
+  });
+ }
  function show(row,league){
-  const teams=row.querySelector('.match-teams').textContent.trim();
-  const kickoff=row.querySelector('.match-date').textContent.trim();
-  const parts=teams.split(' – ');
+  const home=row.dataset.home,away=row.dataset.away,kickoff=row.querySelector('.match-date').textContent.trim();
   document.getElementById('detailLeague').textContent=league;
-  document.getElementById('detailTeams').textContent=teams;
+  document.getElementById('detailTeams').textContent=home+' – '+away;
   document.getElementById('detailKickoff').textContent=kickoff;
   document.getElementById('detailCompetition').textContent=league;
   document.getElementById('detailDate').textContent=kickoff;
-  document.getElementById('detailHome').textContent=parts[0]||'—';
-  document.getElementById('detailAway').textContent=parts[1]||'—';
-  detail.classList.add('open');detail.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';detail.scrollTop=0;
+  document.getElementById('detailHome').textContent=home||'—';
+  document.getElementById('detailAway').textContent=away||'—';
+  const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
+  [home,away].forEach((name,i)=>{
+   const wrap=document.createElement('div');wrap.className='detail-club';
+   const url=badgeCache.get(clean(name))||badgeCache.get(clean(aliases[name.toLowerCase()]||''));
+   if(url){const img=document.createElement('img');img.src=url;img.alt='Stemma '+name;img.onerror=()=>img.replaceWith(fallback(name));wrap.append(img);}else wrap.append(fallback(name));
+   const label=document.createElement('span');label.textContent=name;wrap.append(label);clubs.append(wrap);
+   if(i===0){const vs=document.createElement('span');vs.className='detail-vs';vs.textContent='VS';clubs.append(vs);}
+  });
+  detail.classList.add('open');detail.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';detail.scrollTop=0;
  }
  leagueCards.forEach(card=>{
   const league=card.querySelector('h3').textContent.trim();
   card.querySelectorAll('.match-row').forEach(row=>{
-   const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';
-   btn.addEventListener('click',()=>show(row,league));row.appendChild(btn);
+   const original=row.querySelector('.match-teams').textContent.trim(),parts=original.split(' – ');
+   row.dataset.originalTeams=original;row.dataset.home=parts[0]||'';row.dataset.away=parts[1]||'';
+   const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';btn.addEventListener('click',()=>show(row,league));row.appendChild(btn);
   });
+  loadLeagueBadges(card);
  });
  function close(){detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
  document.getElementById('backToCalendar').addEventListener('click',close);
