@@ -28,7 +28,7 @@ header{position:fixed;inset:0 auto 0 0;width:248px;height:100vh;border-right:1px
 nav{display:flex;flex-direction:column;gap:9px}
 nav a{display:flex;align-items:center;gap:13px;padding:13px 14px;border:1px solid transparent;border-radius:12px;color:#9eafc5;font-weight:650}
 nav a:before{font-size:18px;width:22px;text-align:center}
-nav a[href="#home"]:before{content:"⌂"}nav a[href="#statistiche"]:before{content:"▥"}nav a[href="#campionati"]:before{content:"🏆"}nav a[href="#calendario"]:before{content:"▦"}nav a[href="#info"]:before{content:"ⓘ"}
+nav a[href="#home"]:before{content:"⌂"}nav a[href="#statistiche"]:before{content:"▥"}nav a[href="#campionati"]:before{content:"🏆"}nav a[href="#calendario"]:before{content:"▦"}nav a[href="#live"]:before{content:"●";color:var(--green)}nav a[href="#info"]:before{content:"ⓘ"}
 nav a:hover,nav a.active{color:var(--green);background:#142316;border-color:#36501b;box-shadow:inset 3px 0 var(--green)}
 nav:after{content:"♙  AMMINISTRATORE";display:block;margin-top:18px;padding:15px 12px;border-radius:12px;text-align:center;font-weight:900;font-size:12px;letter-spacing:1px;color:#071000;background:var(--green);box-shadow:0 0 25px #b7ff0055}
 main{max-width:none;margin-left:248px;padding:38px clamp(22px,4vw,58px) 64px}
@@ -73,6 +73,16 @@ footer{margin-left:248px}
 .live-panel{margin:16px 0;padding:17px;border:1px solid #2b4056;border-radius:15px;background:linear-gradient(145deg,#101d30,#0a1423)}.live-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.live-state{font-size:11px;font-weight:900;letter-spacing:.7px;color:var(--muted);text-transform:uppercase}.live-score{font-size:27px;font-weight:900;letter-spacing:1px;margin:7px 0}.live-message{font-size:13px;color:var(--muted)}.live-refresh{border:1px solid #5d821f;background:#172715;color:var(--green);padding:8px 12px;border-radius:9px;font-weight:850;cursor:pointer}.live-refresh:disabled{opacity:.55;cursor:wait}
 .detail-tabs{display:flex;gap:8px;margin:24px 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}.detail-tab{border:1px solid var(--line);background:#0c1728;color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}.detail-tab.active{background:#192a16;color:var(--green);border-color:#587c22}.tab-panel[hidden]{display:none}.lineup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.lineup-card{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #24384e;border-radius:16px;padding:18px}.lineup-card h3{margin:0 0 5px}.lineup-module{display:inline-block;color:var(--green);background:#1a2c16;border:1px solid #38531b;border-radius:7px;padding:4px 8px;font-size:12px;font-weight:850;margin:8px 0}.lineup-empty{margin-top:12px;padding:14px;border:1px dashed #38506a;border-radius:11px;color:var(--muted);font-size:13px}.lineup-status{font-size:11px;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.7px}@media(max-width:560px){.lineup-grid{grid-template-columns:1fr}.detail-tabs{overflow-x:auto}}
 
+.live-fixture-card{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #29445a;border-radius:16px;padding:17px;min-width:0}
+.live-fixture-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;color:var(--muted);font-size:12px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 12px #ff4d5e;margin-right:6px}
+.live-fixture-score{font-size:23px;font-weight:900;color:var(--green);white-space:nowrap}
+.live-fixture-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;font-weight:750}
+.live-fixture-teams span:last-child{text-align:right}
+.live-fixture-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px}
+.live-minute{color:#ff7b87;font-size:12px;font-weight:900}
+.live-empty{grid-column:1/-1;padding:22px;text-align:center;color:var(--muted);border:1px dashed #38506a;border-radius:14px}
+@media(max-width:560px){.live-fixture-card{padding:14px}.live-fixture-teams{font-size:12px;gap:5px}.live-fixture-score{font-size:20px}}
 /* Ottimizzazione smartphone */
 @media(max-width:760px){
  html{scroll-padding-top:76px}
@@ -126,9 +136,16 @@ footer{margin-left:248px}
 </style>
 </head>
 <body>
-<header><div class="nav"><div class="brand"><span class="ball">⚽</span> Analisi Calcio</div><nav><a class="active" href="#home">Home</a><a href="#statistiche">Statistiche</a><a href="#campionati">Campionati</a><a href="#calendario">Calendario</a><a href="#info">Info</a></nav></div></header>
+<header><div class="nav"><div class="brand"><span class="ball">⚽</span> Analisi Calcio</div><nav><a class="active" href="#home">Home</a><a href="#statistiche">Statistiche</a><a href="#campionati">Campionati</a><a href="#calendario">Calendario</a><a href="#live">Live</a><a href="#info">Info</a></nav></div></header>
 <main id="home">
 <section class="hero"><div class="eyebrow">Dati, contesto e approfondimenti</div><h1>Il calcio, letto<br>attraverso i numeri.</h1><p>Uno spazio dedicato alle statistiche delle squadre, all’andamento dei campionati e alla lettura dei dati sportivi.</p></section>
+<section id="live">
+<div class="section-head"><h2>Partite Live <span class="tag">IN DIRETTA</span></h2><span id="liveUpdated">Solo incontri in corso · aggiornamento automatico</span></div>
+<div class="live-panel">
+ <div class="live-top"><div class="live-message" id="liveSummary">Controllo delle partite in corso…</div><button class="live-refresh" id="refreshLiveList" type="button">Aggiorna</button></div>
+</div>
+<div id="liveFixtures" class="matchday-grid"><div class="lineup-empty">Caricamento partite live…</div></div>
+</section>
 <div class="section-head" id="statistiche"><h2>Panoramica statistica</h2><span>Esempi dimostrativi · dati non aggiornati</span></div>
 <section class="grid">
 <article class="card"><span class="tag">SQUADRE</span><h3>Gol segnati</h3><div class="metric">1,8</div><div class="muted">Media dimostrativa per partita</div></article>
@@ -305,6 +322,63 @@ footer{margin-left:248px}
   });
   loadLeagueBadges(card);
  });
+ const LIVE_LEAGUES=new Set(['39','135','140','61','78','2']);
+ const LIVE_STATUSES=new Set(['1H','HT','2H','ET','BT','P','LIVE','INT','PEN']);
+ async function loadLiveMatches(){
+  const list=document.getElementById('liveFixtures');
+  const summary=document.getElementById('liveSummary');
+  const button=document.getElementById('refreshLiveList');
+  if(button)button.disabled=true;
+  summary.textContent='Aggiornamento delle partite in corso…';
+  try{
+   const response=await fetch(API_BASE.replace(/\\/$/,'')+'/fixtures/live',{headers:{'Accept':'application/json'}});
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const payload=await response.json();
+   if(payload.errors&&Object.keys(payload.errors).length)throw new Error('Errore della fonte dati');
+   const fixtures=(Array.isArray(payload.response)?payload.response:[]).filter(f=>
+    LIVE_LEAGUES.has(String(f.league?.id))&&LIVE_STATUSES.has(String(f.fixture?.status?.short||''))
+   );
+   list.replaceChildren();
+   if(!fixtures.length){
+    const empty=document.createElement('div');empty.className='live-empty';empty.textContent='Al momento non ci sono partite in corso nelle competizioni seguite.';
+    list.append(empty);summary.textContent='Nessuna partita in diretta.';return;
+   }
+   fixtures.forEach(f=>{
+    const leagueId=String(f.league?.id||'');
+    const league=f.league?.name||'Competizione';
+    const home=f.teams?.home?.name||'Casa',away=f.teams?.away?.name||'Trasferta';
+    const status=f.fixture?.status?.short||'LIVE';
+    const elapsed=f.fixture?.status?.elapsed;
+    const card=document.createElement('article');card.className='live-fixture-card';
+    const head=document.createElement('div');head.className='live-fixture-head';
+    const comp=document.createElement('strong');comp.textContent=league;
+    const live=document.createElement('span');live.innerHTML='<span class="live-dot"></span>LIVE';
+    head.append(comp,live);
+    const teams=document.createElement('div');teams.className='live-fixture-teams';
+    const homeEl=document.createElement('span');homeEl.textContent=home;
+    const score=document.createElement('strong');score.className='live-fixture-score';score.textContent=(f.goals?.home??0)+' - '+(f.goals?.away??0);
+    const awayEl=document.createElement('span');awayEl.textContent=away;
+    teams.append(homeEl,score,awayEl);
+    const meta=document.createElement('div');meta.className='live-fixture-meta';
+    const minute=document.createElement('span');minute.className='live-minute';
+    minute.textContent=elapsed!=null?String(elapsed)+'′':(status==='HT'?'Intervallo':status==='PEN'?'Rigori':'In corso');
+    const row=document.createElement('div');row.className='match-row';row.dataset.home=home;row.dataset.away=away;row.dataset.originalTeams=home+' – '+away;row.dataset.leagueId=leagueId;row.dataset.date=f.fixture?.date?.slice(0,10)||'';
+    const kickoff=document.createElement('div');kickoff.className='match-date';kickoff.textContent=minute.textContent;
+    const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';btn.addEventListener('click',()=>show(row,league));
+    meta.append(minute,btn);
+    card.append(head,teams,meta);list.append(card);
+   });
+   summary.textContent=fixtures.length+' '+(fixtures.length===1?'partita in corso':'partite in corso')+' nelle competizioni seguite.';
+   document.getElementById('liveUpdated').textContent='Ultimo aggiornamento: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  }catch(error){
+   list.replaceChildren();const empty=document.createElement('div');empty.className='live-empty';empty.textContent='Non è stato possibile caricare le partite live. Riprova tra poco.';list.append(empty);
+   summary.textContent='Errore nel collegamento alla fonte dati.';
+  }finally{if(button)button.disabled=false;}
+ }
+ document.getElementById('refreshLiveList').addEventListener('click',loadLiveMatches);
+ loadLiveMatches();
+ setInterval(()=>{if(!document.hidden)loadLiveMatches();},60000);
+
  async function loadAddedLeagueFixtures(){
   const cards=document.querySelectorAll('.league-fixtures[data-api-league]');
   for(const card of cards){
