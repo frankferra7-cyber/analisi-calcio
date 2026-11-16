@@ -69,6 +69,8 @@ footer{margin-left:248px}
 .detail-clubs{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 8px}.detail-club{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:42%;text-align:center;font-weight:800}.detail-club img{width:76px;height:76px;object-fit:contain;padding:7px;border-radius:18px;background:#f5f7fa}.detail-club .club-fallback{width:76px;height:76px;font-size:18px;border-radius:18px}.detail-vs{color:var(--green);font-size:17px;font-weight:950}
 @media(max-width:560px){.team-pair{gap:5px}.team-side{gap:4px}.club-badge,.club-fallback{width:28px;height:28px;flex-basis:28px}.team-name{font-size:10px}.detail-club img,.detail-club .club-fallback{width:62px;height:62px}}
 
+
+.detail-tabs{display:flex;gap:8px;margin:24px 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}.detail-tab{border:1px solid var(--line);background:#0c1728;color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}.detail-tab.active{background:#192a16;color:var(--green);border-color:#587c22}.tab-panel[hidden]{display:none}.lineup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.lineup-card{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #24384e;border-radius:16px;padding:18px}.lineup-card h3{margin:0 0 5px}.lineup-module{display:inline-block;color:var(--green);background:#1a2c16;border:1px solid #38531b;border-radius:7px;padding:4px 8px;font-size:12px;font-weight:850;margin:8px 0}.lineup-empty{margin-top:12px;padding:14px;border:1px dashed #38506a;border-radius:11px;color:var(--muted);font-size:13px}.lineup-status{font-size:11px;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.7px}@media(max-width:560px){.lineup-grid{grid-template-columns:1fr}.detail-tabs{overflow-x:auto}}
 </style>
 </head>
 <body>
@@ -139,14 +141,26 @@ footer{margin-left:248px}
    <div class="detail-clubs" id="detailClubs"></div><div class="detail-teams" id="detailTeams">Partita</div>
    <div class="muted" id="detailKickoff"></div>
   </div>
-  <div class="section-head"><h2>Dettagli incontro</h2><span>Scheda informativa</span></div>
-  <div class="detail-grid">
-   <div class="detail-item"><small>Competizione</small><strong id="detailCompetition">—</strong></div>
-   <div class="detail-item"><small>Data e ora</small><strong id="detailDate">—</strong></div>
-   <div class="detail-item"><small>Squadra di casa</small><strong id="detailHome">—</strong></div>
-   <div class="detail-item"><small>Squadra ospite</small><strong id="detailAway">—</strong></div>
+  <div class="detail-tabs" role="tablist" aria-label="Sezioni partita">
+   <button class="detail-tab active" id="tabMatchDetails" type="button" role="tab" aria-selected="true">Dettagli incontro</button>
+   <button class="detail-tab" id="tabLineups" type="button" role="tab" aria-selected="false">Probabili formazioni</button>
   </div>
-  <div class="note">Le statistiche avanzate e i dati in tempo reale non sono ancora collegati a una fonte dati: questa scheda mostra le informazioni della partita già presenti nel calendario.</div>
+  <div class="tab-panel" id="panelMatchDetails" role="tabpanel">
+   <div class="detail-grid">
+    <div class="detail-item"><small>Competizione</small><strong id="detailCompetition">—</strong></div>
+    <div class="detail-item"><small>Data e ora</small><strong id="detailDate">—</strong></div>
+    <div class="detail-item"><small>Squadra di casa</small><strong id="detailHome">—</strong></div>
+    <div class="detail-item"><small>Squadra ospite</small><strong id="detailAway">—</strong></div>
+   </div>
+   <div class="note">Questa scheda mostra le informazioni della partita presenti nel calendario.</div>
+  </div>
+  <div class="tab-panel" id="panelLineups" role="tabpanel" hidden>
+   <div class="lineup-grid">
+    <article class="lineup-card"><div class="lineup-status">Casa</div><h3 id="lineupHomeName">—</h3><span class="lineup-module">Modulo: da definire</span><div class="lineup-empty">Probabile undici non ancora disponibile. I nomi dei giocatori verranno mostrati solo quando sarà collegata una fonte dati affidabile.</div></article>
+    <article class="lineup-card"><div class="lineup-status">Trasferta</div><h3 id="lineupAwayName">—</h3><span class="lineup-module">Modulo: da definire</span><div class="lineup-empty">Probabile undici non ancora disponibile. I nomi dei giocatori verranno mostrati solo quando sarà collegata una fonte dati affidabile.</div></article>
+   </div>
+   <div class="note">Le probabili formazioni possono cambiare prima della partita. Le formazioni ufficiali vengono normalmente pubblicate poco prima del calcio d'inizio e non sono disponibili per tutte le competizioni. <a href="https://www.api-football.com/documentation-v3" target="_blank" rel="noopener" style="color:var(--green)">Info sulla disponibilità dei dati</a>.</div>
+  </div>
  </div>
 </section>
 <footer>© 2026 Analisi Calcio · Progetto indipendente</footer>
@@ -202,6 +216,9 @@ footer{margin-left:248px}
   document.getElementById('detailDate').textContent=kickoff;
   document.getElementById('detailHome').textContent=home||'—';
   document.getElementById('detailAway').textContent=away||'—';
+  document.getElementById('lineupHomeName').textContent=home||'—';
+  document.getElementById('lineupAwayName').textContent=away||'—';
+  setDetailTab('details');
   const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
   [home,away].forEach((name,i)=>{
    const wrap=document.createElement('div');wrap.className='detail-club';
@@ -221,6 +238,17 @@ footer{margin-left:248px}
   });
   loadLeagueBadges(card);
  });
+ function setDetailTab(which){
+  const details=which==='details';
+  document.getElementById('tabMatchDetails').classList.toggle('active',details);
+  document.getElementById('tabLineups').classList.toggle('active',!details);
+  document.getElementById('tabMatchDetails').setAttribute('aria-selected',String(details));
+  document.getElementById('tabLineups').setAttribute('aria-selected',String(!details));
+  document.getElementById('panelMatchDetails').hidden=!details;
+  document.getElementById('panelLineups').hidden=details;
+ }
+ document.getElementById('tabMatchDetails').addEventListener('click',()=>setDetailTab('details'));
+ document.getElementById('tabLineups').addEventListener('click',()=>setDetailTab('lineups'));
  function close(){detail.classList.remove('open');detail.setAttribute('aria-hidden','true');document.body.style.overflow='';}
  document.getElementById('backToCalendar').addEventListener('click',close);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&detail.classList.contains('open'))close();});
