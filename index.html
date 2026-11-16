@@ -18,6 +18,48 @@ main{max-width:1160px;margin:auto;padding:34px 22px 60px}.hero{padding:32px;bord
 
 .details-btn{border:1px solid #49627e;background:#1b3048;color:var(--green);border-radius:8px;padding:7px 10px;font-weight:750;font-size:11px;cursor:pointer;white-space:nowrap}.details-btn:hover{background:#29435f}
 .match-detail{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto;padding:22px;display:none}.match-detail.open{display:block}.detail-inner{max-width:850px;margin:0 auto}.back-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:10px 14px;cursor:pointer}.detail-hero{margin-top:22px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.detail-teams{font-size:clamp(24px,5vw,38px);font-weight:850;line-height:1.2;margin:12px 0}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.detail-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px}.detail-item small{display:block;color:var(--muted);margin-bottom:4px}@media(max-width:560px){.detail-grid{grid-template-columns:1fr}.match-row{align-items:flex-start}.match-teams{max-width:58%}}
+
+/* Dark Stadium layout */
+:root{--bg:#050914;--panel:#0b1424;--panel2:#111f32;--line:#1d3046;--green:#b7ff00;--blue:#76baff;--text:#f4f8ff;--muted:#94a6bd}
+body{background:radial-gradient(ellipse at 70% -10%,#142b40 0,transparent 34%),linear-gradient(135deg,#050914,#080e1b 65%,#050914)}
+header{position:fixed;inset:0 auto 0 0;width:248px;height:100vh;border-right:1px solid #203249;background:rgba(5,10,20,.97);backdrop-filter:blur(16px);z-index:10}
+.nav{height:100%;padding:26px 17px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:32px}
+.brand{font-size:20px;padding:0 8px}.ball{width:44px;height:44px;border-radius:14px;background:var(--green);box-shadow:0 0 24px #b7ff0044}
+nav{display:flex;flex-direction:column;gap:9px}
+nav a{display:flex;align-items:center;gap:13px;padding:13px 14px;border:1px solid transparent;border-radius:12px;color:#9eafc5;font-weight:650}
+nav a:before{font-size:18px;width:22px;text-align:center}
+nav a[href="#home"]:before{content:"⌂"}nav a[href="#statistiche"]:before{content:"▥"}nav a[href="#campionati"]:before{content:"🏆"}nav a[href="#calendario"]:before{content:"▦"}nav a[href="#info"]:before{content:"ⓘ"}
+nav a:hover,nav a.active{color:var(--green);background:#142316;border-color:#36501b;box-shadow:inset 3px 0 var(--green)}
+nav:after{content:"♙  AMMINISTRATORE";display:block;margin-top:18px;padding:15px 12px;border-radius:12px;text-align:center;font-weight:900;font-size:12px;letter-spacing:1px;color:#071000;background:var(--green);box-shadow:0 0 25px #b7ff0055}
+main{max-width:none;margin-left:248px;padding:38px clamp(22px,4vw,58px) 64px}
+.hero{border:1px solid #2a4055;border-radius:22px;background:linear-gradient(115deg,#10243a,#0a1424 72%);box-shadow:0 18px 55px #0005;padding:38px}
+.eyebrow{color:var(--green)}
+.card,.league-fixtures{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #24384e;box-shadow:0 12px 28px #0003;transition:transform .18s,border-color .18s}
+.card:hover,.league-fixtures:hover{transform:translateY(-3px);border-color:#8ebd2d}
+.card{padding:23px;border-radius:18px}.league-fixtures{padding:21px;border-radius:18px}
+.tag{background:#1a2c16;color:var(--green);border:1px solid #38531b}
+.metric{color:var(--green);text-shadow:0 0 22px #b7ff0033}
+.section-head h2{letter-spacing:-.4px}
+.match-row{gap:8px}.match-teams{line-height:1.35}
+.details-btn{background:#172715;border:1px solid #5d821f;color:var(--green);padding:8px 11px;border-radius:9px;font-weight:850;box-shadow:0 0 13px #b7ff0010}
+.details-btn:hover{background:var(--green);color:#081000}
+.note{background:#0e1b2c;border:1px solid #22384f;border-radius:14px}
+footer{margin-left:248px}
+.match-detail{background:linear-gradient(140deg,#050914,#0a1423)}
+.back-btn{border-color:#45601f;color:var(--green)}
+.detail-hero{background:linear-gradient(120deg,#12263b,#0b1525);border-color:#30475e}
+.detail-item{background:#0c1728;border-color:#25394f}
+@media(max-width:760px){
+ header{position:sticky;top:0;width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ .nav{height:auto;padding:12px 15px;gap:12px;flex-direction:row;align-items:center}
+ .brand{font-size:17px;padding:0;white-space:nowrap}.ball{width:36px;height:36px}
+ nav{flex-direction:row;overflow-x:auto;gap:5px;flex:1}
+ nav a{white-space:nowrap;padding:8px 10px;font-size:12px}
+ nav a:before{display:none}nav:after{display:none}
+ main{margin-left:0;padding:22px 15px 45px}
+ footer{margin-left:0}
+ .hero{padding:26px}
+}
 </style>
 </head>
 <body>
