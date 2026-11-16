@@ -89,6 +89,9 @@ footer{margin-left:248px}
 <article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> Serie A</h3><p class="muted">Classifica, rendimento casa/trasferta e statistiche di squadra.</p></article>
 <article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> Premier League</h3><p class="muted">Risultati, forma recente e confronto tra club.</p></article>
 <article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> La Liga</h3><p class="muted">Andamento del campionato e indicatori collettivi.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🇫🇷</span> Ligue 1</h3><p class="muted">Campionato francese: squadre, calendario e partite.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🇩🇪</span> Bundesliga</h3><p class="muted">Campionato tedesco: squadre, calendario e partite.</p></article>
+<article class="card"><h3 class="league-title"><span class="league-mark">🏆</span> Champions League</h3><p class="muted">La principale competizione europea per club.</p></article>
 </section>
 <section id="calendario">
 <div class="section-head"><h2>Prossima giornata</h2><span>Solo il prossimo turno · stagione 2026/27</span></div>
@@ -129,8 +132,11 @@ footer{margin-left:248px}
 <div class="match-row"><div class="match-teams">Getafe – Atlético Madrid</div><div class="match-date">Dom 22 · 21:00</div></div>
 <div class="match-row"><div class="match-teams">Levante – Elche</div><div class="match-date">Lun 23 · 21:00</div></div>
 </article>
+<article class="league-fixtures" data-api-league="61" data-league-name="Ligue 1"><h3>🇫🇷 Ligue 1</h3><div class="round-label">Prossime partite · dati API</div><div class="api-fixture-list"><div class="lineup-empty">Caricamento del calendario…</div></div></article>
+<article class="league-fixtures" data-api-league="78" data-league-name="Bundesliga"><h3>🇩🇪 Bundesliga</h3><div class="round-label">Prossime partite · dati API</div><div class="api-fixture-list"><div class="lineup-empty">Caricamento del calendario…</div></div></article>
+<article class="league-fixtures" data-api-league="2" data-league-name="Champions League"><h3>🏆 Champions League</h3><div class="round-label">Prossime partite · dati API</div><div class="api-fixture-list"><div class="lineup-empty">Caricamento del calendario…</div></div></article>
 </div>
-<div class="note">Orari locali italiani. Sono mostrati esclusivamente gli incontri del prossimo turno per ciascun campionato; gli orari possono subire variazioni ufficiali.</div>
+<div class="note">Gli incontri delle competizioni aggiunte vengono richiesti all'API. Orari locali italiani; disponibilità e copertura dipendono dalla fonte.</div>
 </section>
 <section id="info" class="note" style="margin-top:24px"><strong style="color:var(--text)">Informazioni</strong><br>Analisi Calcio è una pagina informativa dimostrativa dedicata alle statistiche sportive. I valori mostrati sono esempi e non costituiscono dati live.</section>
 </main>
@@ -216,6 +222,8 @@ footer{margin-left:248px}
  }
  function show(row,league){
   const home=row.dataset.home,away=row.dataset.away,kickoff=row.querySelector('.match-date').textContent.trim();
+  detail.dataset.leagueId=row.dataset.leagueId||'';
+  detail.dataset.fixtureDate=row.dataset.date||'';
   document.getElementById('detailLeague').textContent=league;
   document.getElementById('detailTeams').textContent=home+' – '+away;
   document.getElementById('detailKickoff').textContent=kickoff;
@@ -246,6 +254,35 @@ footer{margin-left:248px}
   });
   loadLeagueBadges(card);
  });
+ async function loadAddedLeagueFixtures(){
+  const cards=document.querySelectorAll('.league-fixtures[data-api-league]');
+  for(const card of cards){
+   const leagueId=card.dataset.apiLeague,league=card.dataset.leagueName,list=card.querySelector('.api-fixture-list');
+   try{
+    const response=await fetch(API_BASE+'/fixtures?league='+encodeURIComponent(leagueId)+'&season=2026&next=10',{headers:{'Accept':'application/json'}});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const payload=await response.json();
+    if(payload.errors&&Object.keys(payload.errors).length)throw new Error('Provider error');
+    const fixtures=Array.isArray(payload.response)?payload.response:[];
+    list.replaceChildren();
+    if(!fixtures.length){list.textContent='Nessuna partita disponibile dalla fonte dati.';continue;}
+    fixtures.forEach(f=>{
+     const home=f.teams?.home?.name||'Casa',away=f.teams?.away?.name||'Trasferta';
+     const date=f.fixture?.date?new Date(f.fixture.date):null;
+     const row=document.createElement('div');row.className='match-row';
+     row.dataset.home=home;row.dataset.away=away;row.dataset.originalTeams=home+' – '+away;
+     row.dataset.leagueId=leagueId;row.dataset.date=f.fixture?.date?.slice(0,10)||'';
+     const teams=document.createElement('div');teams.className='match-teams';teams.textContent=home+' – '+away;
+     const when=document.createElement('div');when.className='match-date';
+     when.textContent=date&&!Number.isNaN(date.getTime())?date.toLocaleString('it-IT',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Orario da definire';
+     const btn=document.createElement('button');btn.className='details-btn';btn.type='button';btn.textContent='Dettagli';btn.addEventListener('click',()=>show(row,league));
+     row.append(teams,when,btn);list.append(row);
+    });
+   }catch(error){list.textContent='Calendario non disponibile al momento. Riprova più tardi.';}
+  }
+ }
+ loadAddedLeagueFixtures();
+
  function setDetailTab(which){
   const details=which==='details';
   document.getElementById('tabMatchDetails').classList.toggle('active',details);
@@ -274,13 +311,15 @@ footer{margin-left:248px}
   document.getElementById('refreshLive').disabled=false;
  }
  function currentFixtureQuery(){
+  const date=detail.dataset.fixtureDate,leagueId=detail.dataset.leagueId;
+  if(date&&leagueId)return {leagueId,date,season:2026};
   const league=document.getElementById('detailLeague').textContent;
   const dateText=document.getElementById('detailKickoff').textContent;
   const dayMatch=dateText.match(/(?:Ven|Sab|Dom|Lun)\s+(\d{1,2})/i);
-  const leagueId=league.includes('Serie A')?135:league.includes('Premier')?39:140;
+  const fallbackId=league.includes('Serie A')?135:league.includes('Premier')?39:140;
   if(!dayMatch)return null;
   const day=String(dayMatch[1]).padStart(2,'0');
-  return {leagueId,date:'2026-11-'+day,season:2026};
+  return {leagueId:fallbackId,date:'2026-11-'+day,season:2026};
  }
  async function findSelectedFixture(){
   const query=currentFixtureQuery();
