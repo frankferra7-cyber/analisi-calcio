@@ -158,6 +158,10 @@ footer{margin-left:248px}
  const api='https://www.thesportsdb.com/api/v1/json/123/';
  const badgeCache=new Map();
  const clean=s=>(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const aliases={
+  'milan':'AC Milan','inter':'Inter Milan','manchester city':'Manchester City','manchester united':'Manchester United','newcastle':'Newcastle United','brighton':'Brighton and Hove Albion','athletic club':'Athletic Bilbao','real betis':'Real Betis','atletico madrid':'Atletico Madrid','celta':'Celta Vigo','deportivo':'Deportivo La Coruna','racing':'Racing Santander','alaves':'Deportivo Alaves','osasuna':'CA Osasuna','levante':'Levante UD','elche':'Elche CF','espanyol':'RCD Espanyol','como':'Como 1907','roma':'AS Roma','lazio':'SS Lazio','juventus':'Juventus','napoli':'SSC Napoli','torino':'Torino FC','bologna':'Bologna FC','udinese':'Udinese Calcio','genoa':'Genoa CFC','fiorentina':'ACF Fiorentina','parma':'Parma Calcio 1913','cagliari':'Cagliari Calcio','lecce':'US Lecce','atalanta':'Atalanta BC','fulham':'Fulham FC','nottingham forest':'Nottingham Forest','aston villa':'Aston Villa','sunderland':'Sunderland AFC','chelsea':'Chelsea FC','leeds united':'Leeds United','crystal palace':'Crystal Palace','tottenham':'Tottenham Hotspur','ipswich town':'Ipswich Town','arsenal':'Arsenal FC','hull city':'Hull City','liverpool':'Liverpool FC','brentford':'Brentford FC','everton':'Everton FC','valencia':'Valencia CF','sevilla':'Sevilla FC','real madrid':'Real Madrid','barcelona':'FC Barcelona','villarreal':'Villarreal CF','real sociedad':'Real Sociedad','malaga':'Malaga CF','getafe':'Getafe CF'
+ };
+ function badgeFor(name){const canonical=aliases[name.toLowerCase()]||name;return badgeCache.get(clean(name))||badgeCache.get(clean(canonical));}
  function fallback(name){const el=document.createElement('span');el.className='club-fallback';el.textContent=name.split(/\\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();el.setAttribute('aria-label','Stemma non disponibile per '+name);return el;}
  async function loadLeagueBadges(card){
   const title=card.querySelector('h3').textContent.trim();
@@ -178,9 +182,7 @@ footer{margin-left:248px}
    const pair=document.createElement('div');pair.className='team-pair';
    names.forEach((name,i)=>{
     const side=document.createElement('span');side.className='team-side';
-    const key=clean(name);
-    // Solo corrispondenza esatta: niente stemmi assegnati per somiglianza.
-    const url=badgeCache.get(key);
+    const url=badgeFor(name);
     let crest;
     if(url){crest=document.createElement('img');crest.className='club-badge';crest.src=url;crest.alt='Stemma '+name;crest.loading='lazy';crest.onerror=()=>crest.replaceWith(fallback(name));}
     else crest=fallback(name);
@@ -203,9 +205,7 @@ footer{margin-left:248px}
   const clubs=document.getElementById('detailClubs');clubs.replaceChildren();
   [home,away].forEach((name,i)=>{
    const wrap=document.createElement('div');wrap.className='detail-club';
-   const key=clean(name);
-   // Mantiene la stessa corrispondenza esatta usata nel calendario.
-   const url=badgeCache.get(key);
+   const url=badgeFor(name);
    if(url){const img=document.createElement('img');img.src=url;img.alt='Stemma '+name;img.onerror=()=>img.replaceWith(fallback(name));wrap.append(img);}else wrap.append(fallback(name));
    const label=document.createElement('span');label.textContent=name;wrap.append(label);clubs.append(wrap);
    if(i===0){const vs=document.createElement('span');vs.className='detail-vs';vs.textContent='VS';clubs.append(vs);}
