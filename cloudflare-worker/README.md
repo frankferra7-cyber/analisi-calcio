@@ -14,7 +14,8 @@ Questa cartella contiene un proxy Cloudflare Worker. La chiave API resta sul ser
 2. Copia il contenuto di `worker.js` nell'editor del Worker e pubblicalo.
 3. Nelle impostazioni del Worker apri **Settings → Variables and Secrets**.
 4. Aggiungi un secret chiamato esattamente `API_FOOTBALL_KEY` e inserisci lì la chiave API. Non inserirla in GitHub, in `index.html`, in screenshot o in chat.
-5. Aggiungi un secret chiamato `PITCHAPI_KEY` con la chiave gratuita generata su https://pitchapi.dev/. Non inserirla nel sito o in GitHub.\n6. Aggiungi una regola di rate limiting Cloudflare per il dominio del Worker (ad esempio un limite prudente per IP) per proteggere la quota API.
+5. Aggiungi un secret chiamato `PITCHAPI_KEY` con la chiave gratuita generata su https://pitchapi.dev/. Non inserirla nel sito o in GitHub.
+6. Aggiungi una regola di rate limiting Cloudflare per il dominio del Worker (ad esempio un limite prudente per IP) per proteggere la quota API.
 7. Copia l'indirizzo HTTPS del Worker, ad esempio `https://nome-worker.nome-account.workers.dev`.
 
 ## Collegare il sito
@@ -36,7 +37,8 @@ Poi salva e pubblica il file. Non usare l'indirizzo d'esempio: serve quello effe
 ## Endpoint supportati
 
 - `GET /fixtures?league=135&season=2026&date=2026-11-21`
-- `GET /fixtures/lineups?fixture=ID` (formazioni ufficiali API-Football, mantenuto per compatibilità)\n- `GET /pitchapi/lineups?date=2026-11-21&home=...&away=...` (probabili e ufficiali PitchAPI)
+- `GET /fixtures/lineups?fixture=ID` (formazioni ufficiali API-Football, mantenuto per compatibilità)
+- `GET /pitchapi/lineups?date=2026-11-21&home=...&away=...` (probabili e ufficiali PitchAPI)
 
 Il Worker limita le competizioni e i parametri consentiti, gestisce CORS per il sito GitHub Pages e mette in cache brevemente i risultati live e più a lungo le formazioni. La cache non sostituisce una regola di rate limiting.
 
@@ -44,7 +46,7 @@ Il Worker limita le competizioni e i parametri consentiti, gestisce CORS per il 
 
 - Finché il Worker e il secret non sono configurati, il sito mostrerà correttamente che la fonte non è collegata.
 - Un endpoint che risponde non garantisce che il provider abbia dati per quella partita.
-- Le formazioni possono essere pubblicate solo poco prima del calcio d'inizio e non per ogni competizione.
+- Le probabili possono comparire fino a 48 ore prima del calcio d'inizio; alcune competizioni forniscono solo le ufficiali o nessuna formazione.
 - Il calendario dimostrativo già presente nel sito va verificato con il provider prima di considerare affidabili le partite mostrate.
 
 
