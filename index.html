@@ -72,6 +72,57 @@ footer{margin-left:248px}
 
 .live-panel{margin:16px 0;padding:17px;border:1px solid #2b4056;border-radius:15px;background:linear-gradient(145deg,#101d30,#0a1423)}.live-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.live-state{font-size:11px;font-weight:900;letter-spacing:.7px;color:var(--muted);text-transform:uppercase}.live-score{font-size:27px;font-weight:900;letter-spacing:1px;margin:7px 0}.live-message{font-size:13px;color:var(--muted)}.live-refresh{border:1px solid #5d821f;background:#172715;color:var(--green);padding:8px 12px;border-radius:9px;font-weight:850;cursor:pointer}.live-refresh:disabled{opacity:.55;cursor:wait}
 .detail-tabs{display:flex;gap:8px;margin:24px 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}.detail-tab{border:1px solid var(--line);background:#0c1728;color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}.detail-tab.active{background:#192a16;color:var(--green);border-color:#587c22}.tab-panel[hidden]{display:none}.lineup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.lineup-card{background:linear-gradient(145deg,#101d30,#0a1423);border:1px solid #24384e;border-radius:16px;padding:18px}.lineup-card h3{margin:0 0 5px}.lineup-module{display:inline-block;color:var(--green);background:#1a2c16;border:1px solid #38531b;border-radius:7px;padding:4px 8px;font-size:12px;font-weight:850;margin:8px 0}.lineup-empty{margin-top:12px;padding:14px;border:1px dashed #38506a;border-radius:11px;color:var(--muted);font-size:13px}.lineup-status{font-size:11px;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.7px}@media(max-width:560px){.lineup-grid{grid-template-columns:1fr}.detail-tabs{overflow-x:auto}}
+
+/* Ottimizzazione smartphone */
+@media(max-width:760px){
+ html{scroll-padding-top:76px}
+ body{overflow-x:hidden}
+ .nav{width:100%;min-width:0;flex-wrap:wrap;gap:10px}
+ .brand{flex:0 0 auto}
+ nav{min-width:0;width:100%;flex:1 1 100%;padding:2px 0 5px;scrollbar-width:thin;overscroll-behavior-x:contain}
+ nav a{flex:0 0 auto;min-height:40px;display:flex;align-items:center;justify-content:center}
+ main{width:100%;min-width:0}
+ .hero{padding:23px 19px}
+ .hero h1{font-size:clamp(29px,8vw,40px)}
+ .grid,.split,.matchday-grid{grid-template-columns:minmax(0,1fr)}
+ .card,.league-fixtures{min-width:0;padding:17px}
+ .section-head{gap:5px;margin:25px 0 12px}
+ .section-head h2{font-size:19px}
+ .match-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:9px;row-gap:8px}
+ .match-row .match-teams{min-width:0;overflow-wrap:anywhere}
+ .match-row .team-pair{grid-column:1/-1;min-width:0;justify-content:flex-start;flex-wrap:wrap}
+ .match-row .match-date{white-space:normal;text-align:right;max-width:120px}
+ .details-btn{min-height:38px;padding:8px 10px}
+ .match-detail{padding:12px; padding-top:max(12px,env(safe-area-inset-top))}
+ .detail-inner{width:100%;min-width:0}
+ .detail-hero{padding:19px 14px;margin-top:14px}
+ .detail-grid{grid-template-columns:minmax(0,1fr)}
+ .detail-tabs{gap:6px;margin:18px 0 12px;scrollbar-width:thin}
+ .detail-tab{flex:0 0 auto;min-height:42px;padding:9px 11px}
+ .lineup-card{min-width:0;padding:15px}
+ .live-panel{padding:14px}
+ .live-refresh,.back-btn{min-height:42px}
+}
+@media(max-width:420px){
+ main{padding:17px 11px 36px}
+ .nav{padding:10px 11px}
+ .brand{font-size:16px}
+ .ball{width:34px;height:34px}
+ nav{gap:4px}
+ nav a{font-size:11px;padding:7px 8px}
+ .hero{padding:21px 16px;border-radius:17px}
+ .hero p{font-size:14px}
+ .card,.league-fixtures{padding:15px;border-radius:14px}
+ .match-teams{font-size:12px}
+ .match-date{font-size:10px}
+ .detail-clubs{gap:8px}
+ .detail-club{font-size:12px}
+ .detail-teams{font-size:25px}
+}
+@media(hover:none){
+ .card:hover,.league-fixtures:hover{transform:none}
+}
+
 </style>
 </head>
 <body>
